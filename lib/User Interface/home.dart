@@ -1,8 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:weather/weather.dart';
 import 'package:weather_app/Services/CONSTS/consts.dart';
 import 'package:weather_app/Services/Models/weather_model.dart';
 import 'package:weather_app/Services/weather_services.dart';
+import 'package:weather_app/User%20Interface/about_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,6 +15,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  //  weather factory variable
+  Weather? weather;
+  final WeatherFactory _wf = WeatherFactory(APIKEY);
   //  api key
   final weatherServices = WeatherServices(apiKey: APIKEY);
   WeatherModel? _weather;
@@ -32,7 +38,9 @@ class _HomePageState extends State<HomePage> {
 
   //  weather animation
   String getWeatherAnimation(String? mainCondition) {
-    if (mainCondition == null) return 'Assets/Sunny.json'; // default sunny
+    if (mainCondition == null) {
+      return 'Assets/Loading Animation.json'; // default sunny
+    }
 
     switch (mainCondition.toLowerCase()) {
       case 'clouds':
@@ -64,7 +72,7 @@ class _HomePageState extends State<HomePage> {
       case 'cold':
         return 'Assets/Snow.json';
       default:
-        return 'Assets/Sunny.json';
+        return 'Assets/Loading Animation.json';
     }
   }
 
@@ -75,11 +83,41 @@ class _HomePageState extends State<HomePage> {
 
     //  fetch weather on startup
     _fetchWeather();
+
+    //  getting weather name
+    _wf.currentWeatherByCityName('Multan').then((value) {
+      setState(() {
+        weather = value;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      //  app bar
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0.0,
+        actions: [
+          Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width * 0.02),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                    CupertinoPageRoute(builder: (context) => AboutPage()));
+              },
+              child: Icon(
+                Icons.info_outline,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+      //  body
       body: _buildUI(),
     );
   }
@@ -88,27 +126,27 @@ class _HomePageState extends State<HomePage> {
     return Align(
       alignment: Alignment.center,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
             _weather?.cityName ?? 'Loading Please Wait...',
             style: const TextStyle(
               fontWeight: FontWeight.w700,
+              fontSize: 35,
             ),
           ),
+          SizedBox(height: MediaQuery.sizeOf(context).height * 0.02),
           Text(
             '${_weather?.temperature.round()}° C',
             style: const TextStyle(
               fontWeight: FontWeight.w700,
+              fontSize: 20,
             ),
           ),
+          SizedBox(height: MediaQuery.sizeOf(context).height * 0.01),
           _animationBuilder(),
-          Text(
-            _weather?.mainCondition ?? 'Loading Please Wait...',
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          SizedBox(height: MediaQuery.sizeOf(context).height * 0.01),
+          _extraInformation(),
         ],
       ),
     );
@@ -117,5 +155,210 @@ class _HomePageState extends State<HomePage> {
   Widget _animationBuilder() {
     return Lottie.asset(getWeatherAnimation(
         _weather?.mainCondition ?? 'Loading Please Wait...'));
+  }
+
+  //  maximum Temperature block
+  Widget _maxTemp() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.05,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondary,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.06,
+            vertical: MediaQuery.of(context).size.height * 0.01,
+          ),
+          child: Text(
+            'Max Temp: ${weather?.tempMax!.celsius!.toStringAsFixed(0)}° C',
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              fontSize: 15,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  //  minimum temperature block
+  Widget _minTemp() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.05,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondary,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.06,
+            vertical: MediaQuery.of(context).size.height * 0.01,
+          ),
+          child: Text(
+            'Min Temp: ${weather?.tempMin!.celsius!.toStringAsFixed(0)}° C',
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              fontSize: 15,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  //  humidity index
+  Widget _humidityIndex() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.05,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        color: Theme.of(context).colorScheme.secondary,
+      ),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.075,
+            vertical: MediaQuery.of(context).size.height * 0.01,
+          ),
+          child: Text(
+            'Humidity: ${weather?.humidity!.toStringAsFixed(0)}%',
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              fontSize: 15,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  //  wind speed index
+  Widget _windSpeedIndex() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.05,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondary,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.04,
+            vertical: MediaQuery.of(context).size.height * 0.01,
+          ),
+          child: Text(
+            'Wind Speed: ${weather?.windSpeed!.toStringAsFixed(0)}m/s',
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              fontSize: 15,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  //  main Condition
+  Widget _mainCondition() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.05,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondary,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.13,
+            vertical: MediaQuery.of(context).size.height * 0.01,
+          ),
+          child: Text(
+            _weather?.mainCondition ?? 'Loading Please Wait...',
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  //  pressure index
+  Widget _pressureIndex() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.05,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondary,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.04,
+            vertical: MediaQuery.of(context).size.height * 0.01,
+          ),
+          child: Text(
+            'Pressure: ${weather?.pressure!.toStringAsFixed(0)}m/s',
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              fontSize: 15,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  //  displaying extra information
+  Widget _extraInformation() {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+          horizontal: MediaQuery.of(context).size.width * 0.02),
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.31,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _mainCondition(),
+                SizedBox(width: MediaQuery.of(context).size.width * 0.01),
+                _pressureIndex(),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _minTemp(),
+                SizedBox(width: MediaQuery.of(context).size.width * 0.01),
+                _maxTemp(),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _windSpeedIndex(),
+                SizedBox(width: MediaQuery.of(context).size.width * 0.01),
+                _humidityIndex(),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

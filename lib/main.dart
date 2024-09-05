@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weather_app/Themes/theme.dart';
 import 'package:weather_app/User%20Interface/home.dart';
 
 void main() async {
@@ -10,8 +11,11 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: HomePage(),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: lightMode,
+      darkTheme: darkMode,
+      home: const HomePage(),
     );
   }
 }

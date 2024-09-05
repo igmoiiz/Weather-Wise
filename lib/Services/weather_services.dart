@@ -12,6 +12,8 @@ class WeatherServices {
   final String apiKey;
   WeatherServices({required this.apiKey});
 
+  String? cityName;
+
   //  method to get weather
   Future<WeatherModel> getWeather(String cityName) async {
     try {
@@ -45,7 +47,7 @@ class WeatherServices {
       List<Placemark> placemarks =
           await placemarkFromCoordinates(position.latitude, position.longitude);
       //  extract city name from the first place mark
-      String? cityName = placemarks[0].locality;
+      cityName = placemarks[0].locality;
       return cityName ?? "Trouble getting your Location!";
     } on Exception catch (e) {
       throw Exception(e.toString());
