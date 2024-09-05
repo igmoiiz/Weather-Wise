@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:weather/weather.dart';
 import 'package:weather_app/Services/CONSTS/consts.dart';
 import 'package:weather_app/Services/Models/weather_model.dart';
 import 'package:weather_app/Services/weather_services.dart';
@@ -15,9 +14,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  //  weather factory variable
-  Weather? weather;
-  final WeatherFactory _wf = WeatherFactory(APIKEY);
   //  api key
   final weatherServices = WeatherServices(apiKey: APIKEY);
   WeatherModel? _weather;
@@ -85,19 +81,13 @@ class _HomePageState extends State<HomePage> {
 
     //  fetch weather on startup
     _fetchWeather();
-
-    //  getting weather name
-    _wf.currentWeatherByCityName('Multan').then((value) {
-      setState(() {
-        weather = value;
-      });
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
+      resizeToAvoidBottomInset: false,
       //  app bar
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -108,8 +98,8 @@ class _HomePageState extends State<HomePage> {
                 horizontal: MediaQuery.of(context).size.width * 0.02),
             child: GestureDetector(
               onTap: () {
-                Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (context) => AboutPage()));
+                Navigator.of(context).push(CupertinoPageRoute(
+                    builder: (context) => const AboutPage()));
               },
               child: Icon(
                 Icons.info_outline,
@@ -174,7 +164,7 @@ class _HomePageState extends State<HomePage> {
             vertical: MediaQuery.of(context).size.height * 0.01,
           ),
           child: Text(
-            'Max Temp: ${weather?.tempMax!.celsius!.toStringAsFixed(0)}° C',
+            'Max Temp: ${_weather?.maxTemp.toStringAsFixed(0)}° C',
             style: const TextStyle(
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -201,7 +191,7 @@ class _HomePageState extends State<HomePage> {
             vertical: MediaQuery.of(context).size.height * 0.01,
           ),
           child: Text(
-            'Min Temp: ${weather?.tempMin!.celsius!.toStringAsFixed(0)}° C',
+            'Min Temp: ${_weather?.minTemp.toStringAsFixed(0)}° C',
             style: const TextStyle(
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -228,7 +218,7 @@ class _HomePageState extends State<HomePage> {
             vertical: MediaQuery.of(context).size.height * 0.01,
           ),
           child: Text(
-            'Humidity: ${weather?.humidity!.toStringAsFixed(0)}%',
+            'Humidity: ${_weather?.humidity.toStringAsFixed(0)}%',
             style: const TextStyle(
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -255,7 +245,7 @@ class _HomePageState extends State<HomePage> {
             vertical: MediaQuery.of(context).size.height * 0.01,
           ),
           child: Text(
-            'Wind Speed: ${weather?.windSpeed!.toStringAsFixed(0)}m/s',
+            'Wind Speed: ${_weather?.windSpeed.toStringAsFixed(0)}m/s',
             style: const TextStyle(
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -308,7 +298,7 @@ class _HomePageState extends State<HomePage> {
             vertical: MediaQuery.of(context).size.height * 0.01,
           ),
           child: Text(
-            'Pressure: ${weather?.pressure!.toStringAsFixed(0)}m/s',
+            'Pressure: ${_weather?.pressure.toStringAsFixed(0)}m/s',
             style: const TextStyle(
               fontWeight: FontWeight.w600,
               color: Colors.white,
