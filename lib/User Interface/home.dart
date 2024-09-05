@@ -76,6 +76,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  //  instance for weather services
+
   //  init state
   @override
   void initState() {
