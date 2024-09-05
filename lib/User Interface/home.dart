@@ -37,12 +37,32 @@ class _HomePageState extends State<HomePage> {
     switch (mainCondition.toLowerCase()) {
       case 'clouds':
         return 'Assets/Clouds.json';
-      case 'sunny':
+      case 'clear':
         return 'Assets/Sunny.json';
       case 'thunderstorm':
         return 'Assets/Thunder.json';
-      case 'storm':
-        return 'Assets/Storm.json';
+      case 'drizzle':
+        return 'Assets/Rain.json';
+      case 'rain':
+        return 'Assets/Rain.json';
+      case 'snow':
+        return 'Assets/Snow.json';
+      case 'sleet':
+        return 'Assets/Snow.json';
+      case 'hail':
+        return 'Assets/Snow.json';
+      case 'fog':
+        return 'Assets/Smoke.json';
+      case 'mist':
+        return 'Assets/Rain.json';
+      case 'smoke':
+        return 'Assets/Smoke.json';
+      case 'dust':
+        return 'Assets/Smoke.json';
+      case 'hot':
+        return 'Assets/Heatwave.json';
+      case 'cold':
+        return 'Assets/Snow.json';
       default:
         return 'Assets/Sunny.json';
     }
@@ -76,14 +96,13 @@ class _HomePageState extends State<HomePage> {
               fontWeight: FontWeight.w700,
             ),
           ),
-          Lottie.asset(getWeatherAnimation(
-              _weather?.mainCondition ?? 'Loading Please Wait...')),
           Text(
             '${_weather?.temperature.round()}° C',
             style: const TextStyle(
               fontWeight: FontWeight.w700,
             ),
           ),
+          _animationBuilder(),
           Text(
             _weather?.mainCondition ?? 'Loading Please Wait...',
             style: const TextStyle(
@@ -93,5 +112,10 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  Widget _animationBuilder() {
+    return Lottie.asset(getWeatherAnimation(
+        _weather?.mainCondition ?? 'Loading Please Wait...'));
   }
 }
